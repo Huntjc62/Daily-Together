@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#173b35"><title>Daily Together</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=5">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
-<script src="app.js" defer></script>
+<script src="app.js?v=4" defer></script>
 </head>
 <body>
 <section id="login" class="login-screen">
@@ -14,7 +14,7 @@
   <h1>Daily Together</h1><p class="sub">Your shared space for the day, one step at a time.</p>
   <form id="loginForm"><label for="email">Supabase email address</label><input id="email" type="email" autocomplete="email" placeholder="Enter your account email" required>
   <label for="password">Supabase password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
-  <button id="loginButton" class="btn primary wide">Sign in</button><p id="loginError" class="error" role="alert"></p></form>
+  <button id="loginButton" type="submit" class="btn primary wide">Sign in</button><p id="loginError" class="error" role="alert"></p></form>
   <p class="fine">A private routine for Josh & Lily</p></div>
 </section>
 <div id="site" class="hidden">

@@ -25,6 +25,11 @@ const ROUTINE = [
 ];
 
 const $ = id => document.getElementById(id);
+window.addEventListener("error", event => {
+  console.error("Daily Together JavaScript error:", event.error || event.message);
+  const message = $("loginError");
+  if (message && !message.textContent) message.textContent = "The app encountered a loading error. Refresh the page; if it continues, send Josh a screenshot of the browser console.";
+});
 const cfg = window.DAILY_TOGETHER_SUPABASE || {};
 const ready = cfg.url && cfg.publishableKey &&
   !cfg.url.includes("YOUR_PROJECT") && !cfg.publishableKey.includes("YOUR_KEY") &&
@@ -89,9 +94,10 @@ async function login(event) {
     await client.auth.signOut().catch(() => {});
     currentUser = null;
     currentRole = null;
-    setMessage("loginError", err.message?.includes("profiles")
-      ? "Your Supabase account has no app profile yet. Check that the setup SQL ran successfully and the user ID matches."
-      : "Sign-in failed. Check the email address and password for your Supabase Auth account.");
+    const detail = String(err?.message || "Unknown sign-in error");
+    setMessage("loginError", detail.toLowerCase().includes("profiles") || detail.toLowerCase().includes("0 rows")
+      ? "Your Supabase login was accepted, but this account has no matching Daily Together profile. Check that the setup SQL ran and the profile UUID matches the Auth user ID."
+      : `Supabase sign-in error: ${detail}`);
   } finally {
     button.disabled = false;
     button.textContent = "Sign in";
@@ -229,14 +235,22 @@ async function logout() {
   await client.auth.signOut();currentUser=null;currentRole=null;completions=[];
   $("site").classList.add("hidden");$("login").classList.remove("hidden");$("password").value="";
 }
-$("loginForm").addEventListener("submit",login);
-$("logout").addEventListener("click",logout);
-if (!ready) {
-  setMessage("loginError", "Setup needed: add your Supabase Project URL and publishable key to supabase-config.js.");
+const loginForm = $("loginForm");
+const loginButton = $("loginButton");
+if (loginForm) loginForm.addEventListener("submit", login);
+if ($("logout")) $("logout").addEventListener("click", logout);
+
+if (!window.supabase?.createClient) {
+  setMessage("loginError", "The Supabase sign-in library did not load. Check your internet connection or try again in a moment.");
+} else if (!cfg.url || !cfg.publishableKey || cfg.url.includes("YOUR_PROJECT") || cfg.publishableKey.includes("YOUR_KEY")) {
+  setMessage("loginError", "Supabase connection details are missing. Check supabase-config.js.");
+} else if (!client) {
+  setMessage("loginError", "Daily Together could not initialise its Supabase connection. Refresh the page and try again.");
 } else {
   client.auth.getSession().then(async ({ data, error }) => {
     if (error) {
       console.error("Session restore error:", error);
+      setMessage("loginError", `Could not check your Supabase session: ${error.message}`);
       return;
     }
     if (data.session) {
@@ -252,6 +266,9 @@ if (!ready) {
         setMessage("loginError", "This Supabase account is not linked to a Daily Together profile. Check the profile IDs in the setup SQL.");
       }
     }
+  }).catch(err => {
+    console.error("Supabase initialisation error:", err);
+    setMessage("loginError", `Could not connect to Supabase: ${err.message || err}`);
   });
 }
 })();
