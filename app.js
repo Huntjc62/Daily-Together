@@ -1,12 +1,8 @@
 (() => {
 "use strict";
 
-// Usernames are mapped to Supabase Auth email addresses.
-// Passwords are created and securely checked by Supabase, not stored in this file.
-const ACCOUNTS = {
-  Josh: { email: "josh@dailytogether.app", role: "admin" },
-  Lily: { email: "lily@dailytogether.app", role: "partner" }
-};
+// Authentication is handled directly by Supabase Auth.
+// User permissions are loaded from the signed-in user's Supabase profile.
 const BUCKET = "daily-evidence";
 const ROUTINE = [
  {time:"7:00 am",title:"Start the day",subtitle:"Wake up with Harper",tasks:["Have a large glass of water.","Open the curtains and get some daylight."]},
@@ -57,26 +53,49 @@ function completionMap() {
 }
 function setMessage(id,msg) { const el=$(id); if(el) el.textContent=msg; }
 
+async function loadCurrentProfile() {
+  const { data, error } = await client.from("profiles")
+    .select("username, role")
+    .eq("id", currentUser.id)
+    .single();
+  if (error) throw error;
+  if (!data || !["admin", "partner"].includes(data.role)) {
+    throw new Error("No valid app profile is linked to this Supabase account.");
+  }
+  currentRole = data.role;
+  return data;
+}
+
 async function login(event) {
   event.preventDefault();
-  setMessage("loginError","");
-  if(!client){setMessage("loginError","Add your Supabase Project URL and publishable key to supabase-config.js first.");return;}
-  const name=$("username").value.trim();
-  const account=ACCOUNTS[name];
-  if(!account){setMessage("loginError","Please use Josh or Lily as your username.");return;}
-  const button=$("loginButton");button.disabled=true;button.textContent="Logging in…";
+  setMessage("loginError", "");
+  if (!client) {
+    setMessage("loginError", "Supabase is not configured. Check the project URL and publishable key.");
+    return;
+  }
+  const email = $("email").value.trim();
+  const password = $("password").value;
+  const button = $("loginButton");
+  button.disabled = true;
+  button.textContent = "Signing in…";
   try {
-    const {data,error}=await client.auth.signInWithPassword({
-      email:account.email,password:$("password").value
-    });
-    if(error) throw error;
-    currentUser=data.user;
-    currentRole=account.role;
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    currentUser = data.user;
+    await loadCurrentProfile();
     await enterApp();
-  } catch(err) {
-    setMessage("loginError","Login failed. Check your username and password, and make sure the Supabase accounts have been created.");
-    console.error(err);
-  } finally {button.disabled=false;button.textContent="Log in";}
+  } catch (err) {
+    console.error("Sign-in error:", err);
+    await client.auth.signOut().catch(() => {});
+    currentUser = null;
+    currentRole = null;
+    setMessage("loginError", err.message?.includes("profiles")
+      ? "Your Supabase account has no app profile yet. Check that the setup SQL ran successfully and the user ID matches."
+      : "Sign-in failed. Check the email address and password for your Supabase Auth account.");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Sign in";
+  }
 }
 async function enterApp() {
   $("login").classList.add("hidden");$("site").classList.remove("hidden");
@@ -86,9 +105,19 @@ async function enterApp() {
   $("headline").textContent=currentRole==="admin"?"Here's how Lily's day is going.":"A calmer day starts here.";
   $("intro").textContent=currentRole==="admin"?"See which steps Lily has completed and view her photo check-ins.":"A realistic routine built around you and Harper. Take it at your own pace — this is a guide, not a test.";
   $("today").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-  await loadCompletions();
-  render();
-  subscribeRealtime();
+  try {
+    await loadCompletions();
+    render();
+    subscribeRealtime();
+  } catch (err) {
+    console.error("Could not load Daily Together data:", err);
+    await client.auth.signOut();
+    currentUser = null;
+    currentRole = null;
+    $("site").classList.add("hidden");
+    $("login").classList.remove("hidden");
+    setMessage("loginError", "Signed in, but the app could not load its data. Check that the Supabase setup SQL and policies have been run.");
+  }
 }
 async function loadCompletions() {
   const {data,error}=await client.from("activity_completions")
@@ -202,14 +231,27 @@ async function logout() {
 }
 $("loginForm").addEventListener("submit",login);
 $("logout").addEventListener("click",logout);
-if(!ready) setMessage("loginError","Setup needed: add your Supabase URL and publishable key to supabase-config.js.");
-else client.auth.getSession().then(async({data})=>{
-  if(data.session){
-    currentUser=data.session.user;
-    const email=currentUser.email;
-    currentRole=email===ACCOUNTS.Josh.email?"admin":email===ACCOUNTS.Lily.email?"partner":null;
-    if(currentRole) await enterApp();
-    else await client.auth.signOut();
-  }
-});
+if (!ready) {
+  setMessage("loginError", "Setup needed: add your Supabase Project URL and publishable key to supabase-config.js.");
+} else {
+  client.auth.getSession().then(async ({ data, error }) => {
+    if (error) {
+      console.error("Session restore error:", error);
+      return;
+    }
+    if (data.session) {
+      try {
+        currentUser = data.session.user;
+        await loadCurrentProfile();
+        await enterApp();
+      } catch (err) {
+        console.error("Could not load the signed-in user's profile:", err);
+        await client.auth.signOut();
+        currentUser = null;
+        currentRole = null;
+        setMessage("loginError", "This Supabase account is not linked to a Daily Together profile. Check the profile IDs in the setup SQL.");
+      }
+    }
+  });
+}
 })();

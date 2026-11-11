@@ -4,11 +4,7 @@ This edition keeps the approved Daily Together routine and synchronises photo ch
 
 ## Important: passwords are NOT in the website code
 
-The app keeps the familiar `Josh` and `Lily` usernames, but Supabase Auth verifies passwords securely. Do not hardcode passwords into a public GitHub Pages repository. The app maps:
-- Josh → `josh@dailytogether.app` (admin)
-- Lily → `lily@dailytogether.app` (partner)
-
-The password is set when creating each Auth user in Supabase. The old locally stored check-ins do not migrate automatically.
+The login form uses the email address and password of the account created in **Supabase Authentication**. There are no app-specific usernames or passwords in the website code. Supabase verifies the credentials, then the app reads the signed-in account's role from `public.profiles`. Never put a Supabase secret/service-role key or account password in this repository.
 
 ## 1. Create a Supabase project
 
@@ -22,11 +18,12 @@ The password is set when creating each Auth user in Supabase. The old locally st
 In your Supabase project:
 1. Open **Authentication → Users**.
 2. Select **Add user** / **Create new user**.
-3. Create `josh@dailytogether.app`, set Josh's password, and mark the email as confirmed if the dashboard offers that option.
-4. Create `lily@dailytogether.app`, set Lily's password, and mark the email as confirmed.
-5. The supplied Josh and Lily user UUIDs are already included in `supabase-setup.sql`. Make sure they match the two users shown in Authentication → Users.
+3. Create Josh's Supabase Auth user using the email address you want Josh to sign in with.
+4. Create Lily's Supabase Auth user using the email address you want Lily to sign in with.
+5. Set a password for each account and confirm the email if the dashboard offers that option.
+6. Check that the user IDs match the IDs already entered in `supabase-setup.sql`. If they differ, update the IDs in that SQL before running it.
 
-You can keep the usernames as `Josh` and `Lily` on the website login screen. The email addresses are only the underlying Supabase Auth identities. You may use different email addresses if you also update `ACCOUNTS` in `app.js`.
+The app role is determined by the matching row in `public.profiles`, not by the email address. Josh's profile must have role `admin`; Lily's must have role `partner`.
 
 ## 3. Create the database, policies and private photo bucket
 
@@ -63,9 +60,9 @@ You can keep `README.md` too. Then visit **GitHub → repository Settings → Pa
 
 ## 6. Test both devices
 
-1. Open the GitHub Pages URL on Lily's phone and log in with username `Lily` and her Supabase password.
+1. Open the GitHub Pages URL on Lily's phone and sign in using Lily's Supabase Auth email address and password.
 2. Complete one activity and upload its photo.
-3. Open the same URL on Josh's computer and log in with username `Josh` and his password.
+3. Open the same URL on Josh's computer and sign in using Josh's Supabase Auth email address and password.
 4. Josh's dashboard should show the activity and a **View photo** link. New changes are subscribed live; if a device is offline, refresh when it reconnects.
 
 ## How the app works
