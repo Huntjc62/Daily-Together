@@ -112,8 +112,11 @@ begin
   end if;
 end $$;
 
--- After creating the two Auth users, insert their profiles:
--- Replace the UUID placeholders with the actual Auth user IDs.
--- insert into public.profiles (id, username, role) values
--- ('JOSH-AUTH-USER-UUID', 'Josh', 'admin'),
--- ('LILY-AUTH-USER-UUID', 'Lily', 'partner');
+-- Auth users supplied by the app owner:
+-- Josh is the admin; Lily is the partner account.
+insert into public.profiles (id, username, role) values
+('d2369f6d-3a21-43c6-8353-e4d38ca117ea', 'Josh', 'admin'),
+('ee4c1494-3734-4253-a665-153f368761cd', 'Lily', 'partner')
+on conflict (id) do update
+set username = excluded.username,
+    role = excluded.role;

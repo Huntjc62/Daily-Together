@@ -24,7 +24,7 @@ In your Supabase project:
 2. Select **Add user** / **Create new user**.
 3. Create `josh@dailytogether.app`, set Josh's password, and mark the email as confirmed if the dashboard offers that option.
 4. Create `lily@dailytogether.app`, set Lily's password, and mark the email as confirmed.
-5. Copy each user's UUID from the Users list. Do not share passwords or secret keys.
+5. The supplied Josh and Lily user UUIDs are already included in `supabase-setup.sql`. Make sure they match the two users shown in Authentication → Users.
 
 You can keep the usernames as `Josh` and `Lily` on the website login screen. The email addresses are only the underlying Supabase Auth identities. You may use different email addresses if you also update `ACCOUNTS` in `app.js`.
 
@@ -32,9 +32,8 @@ You can keep the usernames as `Josh` and `Lily` on the website login screen. The
 
 1. Open **SQL Editor** in Supabase.
 2. Open `supabase-setup.sql` from this project.
-3. At the bottom, replace `JOSH-AUTH-USER-UUID` and `LILY-AUTH-USER-UUID` with the actual UUIDs copied from Authentication → Users.
-4. Uncomment the final `insert into public.profiles...` block (remove the leading `--` from its three lines).
-5. Run the full SQL script.
+3. The final profile insert is already filled in with Josh's and Lily's supplied UUIDs, with Josh assigned the admin role and Lily assigned the partner role.
+4. Run the full SQL script.
 6. Check that the `profiles` and `activity_completions` tables exist, and that the `daily-evidence` bucket is private.
 
 The SQL sets Row Level Security policies so Lily can add her own photo-backed activity completions, Lily can see her own records, and Josh can view all progress and evidence. The browser only uses the publishable key; never put a Supabase secret/service_role key in website files.
