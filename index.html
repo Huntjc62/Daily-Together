@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#173b35"><title>Daily Together</title>
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=7">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
-<script src="app.js?v=4" defer></script>
+<script src="app.js?v=7" defer></script>
 </head>
 <body>
 <section id="login" class="login-screen">
@@ -23,7 +23,25 @@
 <section class="hero"><div><p id="today" class="kicker"></p><h1 id="headline">A calmer day starts here.</h1><p id="intro" class="sub"></p></div>
 <div class="progress"><div class="progress-top"><span>Today's progress</span><strong id="percent">0%</strong></div><div class="bar"><i id="bar"></i></div><small id="count">0 of 0 activities complete</small></div></section>
 <section id="lilyView"><div class="section-title"><div><p class="kicker">LILY'S DAILY GUIDE</p><h2>Your routine</h2></div><p class="sub">Take it at your own pace. Upload a photo to complete each activity.</p></div><div id="timeline" class="timeline"></div><div id="finish" class="finish hidden">You've made it through today's routine. Well done. 💚</div></section>
-<section id="joshView" class="hidden"><div class="section-title"><div><p class="kicker">JOSH'S OVERVIEW</p><h2>Lily's progress today</h2></div><span class="live">● Live updates enabled</span></div><div class="stats" id="stats"></div><div id="adminTimeline" class="timeline"></div></section>
+<section id="joshView" class="hidden">
+  <div class="section-title"><div><p class="kicker">JOSH'S ADMIN DASHBOARD</p><h2>Manage Daily Together</h2></div><span class="live">● Live updates enabled</span></div>
+  <nav id="adminNav" class="admin-tabs" aria-label="Admin dashboard sections">
+    <button type="button" class="admin-tab active" data-admin-tab="overview">Today's overview</button>
+    <button type="button" class="admin-tab" data-admin-tab="manage">Manage routine</button>
+    <button type="button" class="admin-tab" data-admin-tab="history">Last 7 days</button>
+  </nav>
+  <div data-admin-panel="overview">
+    <div class="stats" id="stats"></div>
+    <div id="adminTimeline" class="timeline"></div>
+  </div>
+  <div data-admin-panel="manage" class="hidden">
+    <div id="managerContent"></div>
+  </div>
+  <div data-admin-panel="history" class="hidden">
+    <div class="history-intro"><h3>Recent activity</h3><p>Daily records and photos are available for the most recent seven days. Older records and photos are automatically cleared by the scheduled Supabase cleanup.</p></div>
+    <div id="historyContent"></div>
+  </div>
+</section>
 </main><footer>Small steps count. Rest is productive, too. <span>♥</span></footer>
 </div>
 <dialog id="uploadDialog"><form method="dialog" class="close"><button class="linkbtn" aria-label="Close">✕</button></form><p class="kicker">PHOTO CHECK-IN</p><h2 id="modalTitle">Complete this step</h2><p id="modalDesc" class="sub"></p><form id="uploadForm"></form></dialog>

@@ -1,0 +1,2 @@
+[functions.cleanup-daily-together]
+verify_jwt = false
