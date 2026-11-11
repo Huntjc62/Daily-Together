@@ -2,27 +2,29 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#173b35"><title>Daily Together</title><link rel="stylesheet" href="styles.css">
+<meta name="theme-color" content="#173b35"><title>Daily Together</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js" defer></script>
 </head>
 <body>
 <section id="login" class="login-screen">
   <div class="login-box"><div class="logo">dt<span>♥</span></div><p class="kicker">A LITTLE STRUCTURE. A LOT OF SUPPORT.</p>
   <h1>Daily Together</h1><p class="sub">Your shared space for the day, one step at a time.</p>
-  <form id="loginForm"><label>Username</label><input id="username" autocomplete="username" placeholder="Enter username" required>
-  <label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter password" required>
-  <button class="btn primary wide">Log in</button><p id="loginError" class="error"></p></form>
+  <form id="loginForm"><label for="username">Username</label><input id="username" autocomplete="username" placeholder="Josh or Lily" required>
+  <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter password" required>
+  <button id="loginButton" class="btn primary wide">Log in</button><p id="loginError" class="error" role="alert"></p></form>
   <p class="fine">A private routine for Josh & Lily</p></div>
 </section>
 <div id="site" class="hidden">
 <header><a class="brand" href="#">daily together <span>♥</span></a><div><b id="who"></b><button id="logout" class="linkbtn">Log out</button></div></header>
 <main>
 <section class="hero"><div><p id="today" class="kicker"></p><h1 id="headline">A calmer day starts here.</h1><p id="intro" class="sub"></p></div>
-<div class="progress"><div class="progress-top"><span>Today's progress</span><strong id="percent">0%</strong></div><div class="bar"><i id="bar"></i></div><small id="count">0 of 0 steps complete</small></div></section>
-<section id="lilyView"><div class="section-title"><div><p class="kicker">LILY'S DAILY GUIDE</p><h2>Your routine</h2></div><p class="sub">Take it at your own pace. Upload a photo to complete each step.</p></div><div id="timeline" class="timeline"></div><div id="finish" class="finish hidden">You've made it through today's routine. Well done. 💚</div></section>
-<section id="joshView" class="hidden"><div class="section-title"><div><p class="kicker">JOSH'S OVERVIEW</p><h2>Lily's progress today</h2></div><span class="live">● Today's overview</span></div><div class="stats" id="stats"></div><div id="adminTimeline" class="timeline"></div></section>
+<div class="progress"><div class="progress-top"><span>Today's progress</span><strong id="percent">0%</strong></div><div class="bar"><i id="bar"></i></div><small id="count">0 of 0 activities complete</small></div></section>
+<section id="lilyView"><div class="section-title"><div><p class="kicker">LILY'S DAILY GUIDE</p><h2>Your routine</h2></div><p class="sub">Take it at your own pace. Upload a photo to complete each activity.</p></div><div id="timeline" class="timeline"></div><div id="finish" class="finish hidden">You've made it through today's routine. Well done. 💚</div></section>
+<section id="joshView" class="hidden"><div class="section-title"><div><p class="kicker">JOSH'S OVERVIEW</p><h2>Lily's progress today</h2></div><span class="live">● Live updates enabled</span></div><div class="stats" id="stats"></div><div id="adminTimeline" class="timeline"></div></section>
 </main><footer>Small steps count. Rest is productive, too. <span>♥</span></footer>
 </div>
-<dialog id="uploadDialog"><form method="dialog" class="close"><button class="linkbtn">✕</button></form><p class="kicker">PHOTO CHECK-IN</p><h2 id="modalTitle">Complete this step</h2><p id="modalDesc" class="sub"></p>
-<form id="uploadForm"><label class="drop"><span class="plus">＋</span><b>Choose a photo</b><small>Take a photo or select one from your device</small><input id="photo" type="file" accept="image/*" capture="environment" required></label><img id="preview" class="preview hidden" alt="Photo preview"><p id="uploadError" class="error"></p><button id="savePhoto" class="btn primary wide">Upload photo & complete step</button></form></dialog>
-<script src="app.js"></script>
+<dialog id="uploadDialog"><form method="dialog" class="close"><button class="linkbtn" aria-label="Close">✕</button></form><p class="kicker">PHOTO CHECK-IN</p><h2 id="modalTitle">Complete this step</h2><p id="modalDesc" class="sub"></p><form id="uploadForm"></form></dialog>
 </body></html>
